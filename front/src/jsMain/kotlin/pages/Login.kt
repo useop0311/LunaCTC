@@ -44,12 +44,12 @@ val Login = FC {
                 padding = 16.px
             }
             h1 {
-                +"WebCTCログイン"
+                +"WebCTC 로그인"
             }
 
             p {
-                +"WebCTCでは、事前に登録したPasskeyでログインをすることができます。"
-                +"Passkeyを登録していない場合、サーバー内で/webctc authを実行し表示されたURLにアクセスしてください。"
+                +"WebCTC에서는 사전에 등록한 Passkey로 로그인할 수 있습니다."
+                +"Passkey를 등록하지 않은 경우, 서버 내에서 /webctc auth를 실행하고 표시된 URL에 접속해 주십시오."
             }
 
             Button {
@@ -57,7 +57,7 @@ val Login = FC {
                 variant = ButtonVariant.contained
                 fullWidth = true
                 startIcon = mui.icons.material.Login.create()
-                +"Passkeyでログイン"
+                +"Passkey로 로그인"
                 onClick = {
                     MainScope().launch {
                         try {
@@ -95,7 +95,7 @@ val Login = FC {
                         } catch (e: Throwable) {
                             e.printStackTrace()
                         }
-                        errorText = "ログインに失敗しました。"
+                        errorText = "로그인에 실패했습니다."
                     }
                 }
             }

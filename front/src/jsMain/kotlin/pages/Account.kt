@@ -66,22 +66,22 @@ data class Service(
 val serviceList = listOf(
     Service(
         "MapViewer",
-        "サーバ全体の線路や在線、信号などを簡易地図で俯瞰して見ることができます",
+        "서버 전체의 선로, 열차, 신호 등을 지도로 조감하여 볼 수 있습니다",
         "/",
     ),
     Service(
         "RailGroup Manager",
-        "レールをグループとして組み、在線をRSブロック/ガラスブロックでMinecraft内に設置する機構や、信号の制御を組上げることができます",
+        "레일을 그룹으로 묶어, 열차를 레드스톤 블록/유리 블록으로 Minecraft 내에 설치하는 기구와 신호 제어를 구성할 수 있습니다",
         "/p/railgroup",
     ),
     Service(
         "WayPoint Editor",
-        "WayPointを編集することができます",
+        "WayPoint를 편집할 수 있습니다",
         "/p/waypoint",
     ),
     Service(
         "TeCon Editor",
-        "連動盤を閲覧・編集することができます",
+        "연동 장치를 열람 및 편집할 수 있습니다",
         "/p/tecons",
     ),
 )
@@ -152,9 +152,9 @@ val Account = FC {
                 }
             }
 
-            h1 { +"サービス一覧" }
+            h1 { +"서비스 목록" }
             Box {
-                p { +"このサーバでは以下のサービスを利用できます。" }
+                p { +"이 서버에서는 다음 서비스를 이용할 수 있습니다." }
 
                 Grid {
                     container = true
@@ -177,7 +177,7 @@ val Account = FC {
                                 }
                                 CardActions {
                                     Button {
-                                        +"使う"
+                                        +"사용하기"
                                         variant = ButtonVariant.contained
                                         color = ButtonColor.primary
                                         onClick = { navigate(service.path) }
@@ -191,16 +191,16 @@ val Account = FC {
 
             h1 { +"Passkey" }
             Box {
-                p { +"WebCTCはPasskeyでのログインに対応しています。(※SSL接続の場合)" }
-                p { +"Passkeyを利用することで、MinecraftサーバーでコマンドからセッションURLを発行することなくログインできます。" }
+                p { +"WebCTC는 Passkey 로그인을 지원합니다. (※SSL 접속 시)" }
+                p { +"Passkey를 이용하면, Minecraft 서버에서 명령어로 세션 URL을 발급받지 않고 로그인할 수 있습니다." }
                 Button {
-                    +"Passkeyを追加"
+                    +"Passkey 추가"
                     variant = ButtonVariant.contained
                     color = ButtonColor.primary
                     startIcon = Add.create()
                     onClick = {
                         passkeyDialogOpen = true
-                        passkeyResult = "Passkeyの登録中..."
+                        passkeyResult = "Passkey 등록 중..."
                         MainScope().launch {
                             try {
                                 val pubKey: WebAuthnRegistrationOption = client.post("/auth/webauthn/challenge").body()
@@ -222,14 +222,14 @@ val Account = FC {
                                 }.let {
                                     if (it.status == HttpStatusCode.OK) {
                                         passkeyResult =
-                                            "Passkeyの登録が完了しました。今後は、MinecraftサーバーでコマンドからセッションURLを発行することなく、Passkeyを利用してログインできます。"
+                                            "Passkey 등록이 완료되었습니다. 이제 Minecraft 서버에서 명령어로 세션 URL을 발급받지 않고 Passkey를 이용하여 로그인할 수 있습니다."
                                         return@launch
                                     }
                                 }
                             } catch (e: Throwable) {
                                 e.printStackTrace()
                             }
-                            passkeyResult = "Passkeyの登録に失敗しました。"
+                            passkeyResult = "Passkey 등록에 실패했습니다."
                         }
                     }
 
@@ -241,7 +241,7 @@ val Account = FC {
                 fullWidth = true
                 maxWidth = Breakpoint.sm
                 open = passkeyDialogOpen
-                DialogTitle { +"Passkey登録" }
+                DialogTitle { +"Passkey 등록" }
                 DialogContent { DialogContentText { +passkeyResult } }
             }
         }
