@@ -2,8 +2,14 @@ pluginManagement {
     repositories {
         mavenCentral()
         gradlePluginPortal()
-        maven(url = "https://maven.minecraftforge.net/")
-        maven(url = "https://plugins.gradle.org/m2/")
+        maven {
+            name = "GTNH Maven"
+            url = uri("https://nexus.gtnewhorizons.com/repository/public/")
+            mavenContent {
+                includeGroupByRegex("com\\.gtnewhorizons\\..+")
+                includeGroup("com.gtnewhorizons")
+            }
+        }
     }
 
     plugins {
@@ -13,13 +19,23 @@ pluginManagement {
         kotlin("multiplatform") version kotlinVersion
         kotlin("js") version kotlinVersion
         kotlin("plugin.serialization") version kotlinVersion
+        kotlin("plugin.js-plain-objects") version kotlinVersion
+
+        val ktorVersion = extra["ktor.version"] as String
+        id("io.ktor.plugin") version ktorVersion
+        id("com.gtnewhorizons.gtnhsettingsconvention") version ("2.0.2")
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
     }
 
-    resolutionStrategy {
-        eachPlugin {
-            when (requested.id.id) {
-                "forge" -> useModule("com.anatawa12.forge:ForgeGradle:1.2-1.1.+")
-            }
+    versionCatalogs {
+        create("kotlinWrappers") {
+            val wrappersVersion = "2026.4.4"
+            from("org.jetbrains.kotlin-wrappers:kotlin-wrappers-catalog:$wrappersVersion")
         }
     }
 }
@@ -28,3 +44,4 @@ rootProject.name = "WebCTC"
 include("front")
 include("mc")
 include("common")
+include("openapi-gen")

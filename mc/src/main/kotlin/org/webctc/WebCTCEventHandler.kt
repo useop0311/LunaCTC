@@ -21,10 +21,12 @@ import org.webctc.common.types.PosInt
 import org.webctc.common.types.railgroup.RailGroup
 import org.webctc.railgroup.RailGroupData
 import org.webctc.railgroup.RailGroupStateWS
+import org.webctc.railgroup.tick
 import org.webctc.railgroup.update
 import org.webctc.router.api.Connection
 import org.webctc.router.api.RailGroupRouter
 import org.webctc.signal.SignalStateWS
+import org.webctc.tecon.TeConRuntimeManager
 import java.util.*
 import kotlin.uuid.Uuid
 import kotlin.uuid.toKotlinUuid
@@ -86,7 +88,9 @@ class WebCTCEventHandler {
                 RailGroupData.railGroupList.forEach { it.update() }
                 tickCount = 0
             }
+            RailGroupData.railGroupList.forEach { it.tick() }
             RailGroupData.updateLocks()
+            TeConRuntimeManager.tick()
             SignalStateWS.sendAll()
             RailGroupStateWS.sendAll()
         }

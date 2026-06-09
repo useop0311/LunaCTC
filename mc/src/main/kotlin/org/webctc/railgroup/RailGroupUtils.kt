@@ -2,12 +2,14 @@ package org.webctc.railgroup
 
 import jp.ngt.rtm.electric.TileEntitySignal
 import jp.ngt.rtm.entity.train.util.FormationManager
+import jp.ngt.rtm.rail.TileEntityLargeRailCore
 import net.minecraft.init.Blocks
 import net.minecraft.nbt.NBTBase
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.nbt.NBTTagList
 import net.minecraft.nbt.NBTTagString
 import net.minecraft.server.MinecraftServer
+import org.webctc.WebCTCCore
 import org.webctc.cache.rail.RailCacheData
 import org.webctc.cache.readFromNBT
 import org.webctc.cache.writeToNBT
@@ -25,6 +27,18 @@ fun RailGroup.isTrainOnRail(): Boolean {
         .any { it.isTrainOnRail }
 }
 
+private fun RailGroup.isTrainOnRailDirect(): Boolean {
+    if (this.isTrainOnRail()) return true
+    val railPosList = this.railPosList
+    val world = WebCTCCore.INSTANCE.server.entityWorld
+    val isTrainOnRailDirect = world.loadedTileEntityList
+        .filterIsInstance<TileEntityLargeRailCore>()
+        .filter { PosInt(it.xCoord, it.yCoord, it.zCoord) in railPosList }
+        .any { it.isTrainOnRail }
+
+    return isTrainOnRailDirect
+}
+
 fun RailGroup.isLocked(): Boolean {
     return RailGroupData.isLocked(this.uuid)
 }
@@ -33,18 +47,18 @@ fun RailGroup.isReserved(): Boolean {
     return RailGroupData.isReserved(this.uuid)
 }
 
+fun RailGroup.getTrainName(): String {
+    val rgFormation = FormationManager.getInstance().formations.values
+        .find { it?.getCurrentRailObj()?.toData()?.pos in this.railPosList }
+
+    return rgFormation?.getControlCar()?.resourceState?.name ?: "?"
+}
+
 fun RailGroup.getState(): RailGroupState {
     val isTrainOnRail = this.isTrainOnRail()
     val isReserved = this.isReserved()
     val isLocked = this.isLocked()
-
-    val rgFormation = if (isTrainOnRail) FormationManager.getInstance().formations.values
-        .find { it?.getCurrentRailObj()?.toData()?.pos in this.railPosList } else null
-    val trainName = if (rgFormation != null) {
-        rgFormation.getControlCar()?.resourceState?.name ?: "?"
-    } else {
-        null
-    }
+    val trainName = if (isTrainOnRail) this.getTrainName() else null
 
     return RailGroupState(this.uuid, isLocked, isReserved, isTrainOnRail, trainName)
 }
@@ -92,6 +106,8 @@ fun RailGroup.writeToNBT(): NBTTagCompound {
         .toNBTTagList()
         .let { tag.setTag("switchSettingList", it) }
 
+    folderUuid?.let { tag.setString("folderUuid", it.toString()) }
+
     return tag
 }
 
@@ -124,17 +140,18 @@ fun RailGroup.Companion.readFromNBT(nbt: NBTTagCompound): RailGroup {
         .map(SwitchSetting::readFromNBT)
         .toMutableSet()
 
-    val railGroup = RailGroup(
+    val folderUuid = if (nbt.hasKey("folderUuid")) Uuid.parse(nbt.getString("folderUuid")) else null
+
+    return RailGroup(
         uuid,
         name,
         railPosList,
         rsPosList,
         nextRailGroupList,
         displayPosList,
-        switchSettings
+        switchSettings,
+        folderUuid = folderUuid
     )
-
-    return railGroup
 }
 
 fun SwitchSetting.writeToNBT(): NBTTagCompound {
@@ -174,7 +191,6 @@ fun SettingEntry.Companion.readFromNBT(nbt: NBTTagCompound): SettingEntry {
     val value = nbt.getBoolean("value")
     return SettingEntry(key, value)
 }
-
 
 fun RailGroup.update() {
     val isTrainOnRail = this.isTrainOnRail()
@@ -218,8 +234,10 @@ fun RailGroup.update() {
             world.setBlock(it.x, it.y, it.z, block, 14, 3)
         }
     }
+}
 
-    if (isTrainOnRail && RailGroupData.hasReleaseFlag(this.uuid)) {
+fun RailGroup.tick() {
+    if (RailGroupData.hasReleaseFlag(this.uuid) && this.isTrainOnRailDirect()) {
         RailGroupData.unsafeRelease(this.uuid)
     }
 }

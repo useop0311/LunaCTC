@@ -13,14 +13,18 @@ import jp.ngt.rtm.rail.TileEntityLargeRailCore
 import net.minecraft.entity.player.EntityPlayer
 import org.webctc.common.types.trains.FormationData
 import org.webctc.common.types.trains.FormationEntityData
+import org.webctc.common.types.trains.TrainData
+import org.webctc.openapi.OpenApiRoute
 import org.webctc.router.WebCTCRouter
 
 class FormationsRouter : WebCTCRouter() {
 
     override fun install(application: Route): Route.() -> Unit = {
+        @OpenApiRoute(summary = "List formations", response = FormationData::class, responseList = true)
         get {
             call.respond(getServerFormationManager().formations.values.mapNotNull { it.toData() })
         }
+        @OpenApiRoute(summary = "Get a formation", response = FormationData::class)
         get("/{FormationID}") {
             val formationId = call.parameters["FormationID"]!!.toLong()
             val formation = this@FormationsRouter.getFormation(formationId)
@@ -31,6 +35,7 @@ class FormationsRouter : WebCTCRouter() {
                 call.respond(formation.toData())
             }
         }
+        @OpenApiRoute(summary = "List trains in a formation", response = TrainData::class, responseList = true)
         get("/{FormationID}/trains") {
             val formationId = call.parameters["FormationID"]!!.toLong()
             val formation = this@FormationsRouter.getFormation(formationId)
@@ -89,6 +94,8 @@ fun Formation.getCurrentRailObj(): TileEntityLargeRailCore? {
         if (controlCar?.getBogie(0)?.isFront == true) controlCar.getBogie(0)
         else controlCar?.getBogie(1)
 
-    return EntityBogie::class.java.getDeclaredField("currentRailObj")
-        .apply { isAccessible = true }.get(frontBogie) as? TileEntityLargeRailCore
+    return frontBogie?.run {
+        EntityBogie::class.java.getDeclaredField("currentRailObj")
+            .apply { isAccessible = true }.get(this)
+    } as? TileEntityLargeRailCore
 }

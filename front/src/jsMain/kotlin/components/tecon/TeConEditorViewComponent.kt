@@ -9,7 +9,6 @@ import io.ktor.http.*
 import js.uri.encodeURIComponent
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import mui.icons.material.Download
 import mui.material.*
 import mui.material.Size
@@ -18,11 +17,13 @@ import org.webctc.common.types.PosInt2D
 import org.webctc.common.types.kotlinxJson
 import org.webctc.common.types.tecon.TeCon
 import org.webctc.common.types.tecon.shape.IShape
+import org.webctc.common.types.tecon.shape.Route
 import react.FC
 import react.Props
-import react.router.useNavigate
 import react.useRef
 import react.useState
+import tanstack.react.router.useNavigate
+import tanstack.router.core.RoutePath
 import utils.removeAtNew
 import utils.setNew
 import web.cssom.*
@@ -149,7 +150,7 @@ val TeConEditorViewComponent = FC<TeConEditorViewComponentProps> { props ->
                             onDelete = {
                                 MainScope().launch {
                                     client.delete("/api/tecons/${tecon.uuid}")
-                                    navigate("/p/tecons")
+                                    navigate { to = RoutePath("/p/tecons") }
                                 }
                             }
                             onDownload = {
@@ -173,7 +174,7 @@ val TeConEditorViewComponent = FC<TeConEditorViewComponentProps> { props ->
                             overflow = Auto.auto
                         }
                         CardContent {
-                            +EditMode.createPropertyElement(part) {
+                            +EditMode.createPropertyElement(part, parts.filterIsInstance<Route>()) {
                                 val index = parts.indexOf(part)
                                 selectedPart = it
                                 parts = parts.setNew(index, it)

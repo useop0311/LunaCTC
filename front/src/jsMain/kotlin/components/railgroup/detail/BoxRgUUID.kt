@@ -1,6 +1,6 @@
 package components.railgroup.detail
 
-import js.objects.jso
+import js.objects.unsafeJso
 import mui.icons.material.ContentCopy
 import mui.material.*
 import react.FC
@@ -20,9 +20,10 @@ val BoxRgUUID = FC<BoxRgUUIDProps> { props ->
         +"UUID"
         Paper {
             OutlinedInput {
+                size = Size.small
                 fullWidth = true
                 value = uuid.toString()
-                inputProps = jso { ariaReadOnly = true }
+                inputProps = unsafeJso { ariaReadOnly = true }
                 endAdornment = InputAdornment.create {
                     position = InputAdornmentPosition.end
                     IconButton {
